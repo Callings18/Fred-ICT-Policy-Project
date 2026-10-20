@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block title %}Audit log · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Audit log</h1>
+    <p class="lede">Who did what, and when. Sign-ins, rule changes, reviews, and report runs are kept here.</p>
+  </div>
+</div>
+<form class="filters" method="get">
+  <label class="field"><span>Search</span><input type="search" name="q" value="{{ filters.q }}" placeholder="User, action, or detail"></label>
+  <label class="field"><span>Action</span>
+    <select name="action">
+      <option value="">All actions</option>
+      {% for item in actions %}
+      <option value="{{ item.action }}" {% if filters.action == item.action %}selected{% endif %}>{{ item.action }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field"><span>From</span><input type="date" name="date_from" value="{{ filters.date_from }}"></label>
+  <label class="field"><span>To</span><input type="date" name="date_to" value="{{ filters.date_to }}"></label>
+  <button class="btn primary" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('auditlog.index') }}">Clear</a>
+</form>
+<p class="muted">{{ pager.total }} records</p>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th scope="col">When</th><th scope="col">User</th><th scope="col">Action</th><th scope="col">Entity</th><th scope="col">Details</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.created_at|when }}</td>
+        <td>{% if row.full_name %}{{ row.full_name }}{% if row.username %} ({{ row.username }}){% endif %}{% else %}System{% endif %}</td>
+        <td>{{ row.action }}</td>
+        <td>{{ row.entity or "—" }}{% if row.entity_id %} #{{ row.entity_id }}{% endif %}</td>
+        <td>{{ row.details or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pager.html" %}
+{% else %}
+<p class="empty">No audit records match these filters.</p>
+{% endif %}
+{% endblock %}

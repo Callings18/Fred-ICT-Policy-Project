@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}{% if editing %}Edit rule{% else %}New rule{% endif %} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{% if editing %}Edit policy rule{% else %}New policy rule{% endif %}</h1>
+    <p class="lede">Keep the condition specific. A broad rule creates a queue that people stop reading.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field wide"><span>Rule name</span><input name="name" required maxlength="120" value="{{ form.name }}"></label>
+    <label class="field"><span>Activity type</span>
+      <select name="activity_type">
+        {% for kind in ['ANY', 'LOGIN', 'LOGOUT', 'APPLICATION', 'RESOURCE_ACCESS', 'NETWORK'] %}
+        <option value="{{ kind }}" {% if form.activity_type == kind %}selected{% endif %}>{{ kind|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Severity</span>
+      <select name="severity">
+        {% for level in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] %}
+        <option value="{{ level }}" {% if form.severity == level %}selected{% endif %}>{{ level }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field wide"><span>Condition</span>
+      <select name="condition_type" data-condition>
+        {% for key in ['OUTSIDE_HOURS', 'WEEKEND', 'APPLICATION_IN', 'RESOURCE_CONTAINS', 'DURATION_OVER', 'EMPLOYEE_NOT_ACTIVE'] %}
+        <option value="{{ key }}" data-hint="{{ hints[key] }}" {% if form.condition_type == key %}selected{% endif %}>{{ key|nice }}</option>
+        {% endfor %}
+      </select>
+      <small class="hint" data-condition-hint></small>
+    </label>
+    <label class="field wide"><span>Condition value</span><input name="condition_value" data-condition-value value="{{ form.condition_value }}" maxlength="300"></label>
+    <label class="field wide"><span>Description</span><textarea name="description" maxlength="1000">{{ form.description or '' }}</textarea></label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save rule</button>
+      <a class="btn ghost" href="{{ url_for('policies.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

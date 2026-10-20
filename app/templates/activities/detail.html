@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Activity {{ activity.id }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ activity.activity_type|nice }}</h1>
+    <p class="lede">{{ activity.full_name }} · {{ activity.occurred_at|when }}</p>
+  </div>
+  <div class="page-actions"><a class="btn ghost" href="{{ url_for('activities.index') }}">All activities</a></div>
+</div>
+<section class="card">
+  <dl class="facts">
+    <div><dt>Employee</dt><dd>{{ activity.full_name }} ({{ activity.employee_number }})</dd></div>
+    <div><dt>Department</dt><dd>{{ activity.department }}</dd></div>
+    <div><dt>Device</dt><dd>{{ activity.hostname or "—" }}{% if activity.ip_address %} · {{ activity.ip_address }}{% endif %}</dd></div>
+    <div><dt>Source</dt><dd>{{ activity.source|nice }}</dd></div>
+    <div><dt>Application</dt><dd>{{ activity.application or "—" }}</dd></div>
+    <div><dt>Resource</dt><dd>{{ activity.resource or "—" }}</dd></div>
+    <div><dt>Duration</dt><dd>{% if activity.duration_minutes is not none %}{{ activity.duration_minutes }} min{% else %}—{% endif %}</dd></div>
+    <div><dt>Recorded</dt><dd>{{ activity.created_at|when }}</dd></div>
+  </dl>
+  {% if activity.details %}<p class="note">{{ activity.details }}</p>{% endif %}
+</section>
+<section class="card">
+  <h2>Alerts from this event</h2>
+  {% if alerts %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Rule</th><th scope="col">Severity</th><th scope="col">Status</th><th scope="col">Raised</th></tr></thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td>{% if can('view_alerts') %}<a href="{{ url_for('alerts.detail', alert_id=alert.id) }}">{{ alert.rule_name }}</a>{% else %}{{ alert.rule_name }}{% endif %}</td>
+          <td><span class="pill {{ alert.severity|lower }}">{{ alert.severity }}</span></td>
+          <td><span class="pill {{ alert.status|lower }}">{{ alert.status|nice }}</span></td>
+          <td>{{ alert.created_at|when }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No policy rule matched this event.</p>
+  {% endif %}
+</section>
+{% endblock %}

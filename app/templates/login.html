@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Sign in · ICT Policy Monitoring{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <section class="auth-card" id="content">
+    <h1>Sign in</h1>
+    <p class="org">ICT Policy Monitoring and Compliance Management System</p>
+    {% include "partials/flashes.html" %}
+    {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+      <label class="field wide">
+        <span>Username</span>
+        <input name="username" autocomplete="username" required value="{{ username }}">
+      </label>
+      <label class="field wide">
+        <span>Password</span>
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <div class="form-actions">
+        <button class="btn primary" type="submit">Sign in</button>
+      </div>
+    </form>
+    <details class="demo-accounts">
+      <summary>Demonstration accounts</summary>
+      <ul>
+        <li><code>admin</code> — Fred Likasi, System Administrator</li>
+        <li><code>officer</code> — Bupe Zulu, ICT/Security Officer</li>
+        <li><code>manager</code> — Patrick Sakala, Management</li>
+        <li><code>hr</code> — Thandiwe Lungu, HR Officer</li>
+      </ul>
+      <p>Shared password: <code>Monitor#2026</code></p>
+    </details>
+  </section>
+</div>
+{% endblock %}

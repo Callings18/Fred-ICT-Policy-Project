@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Record activity · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Record activity</h1>
+    <p class="lede">The policy rules run as soon as the event is saved. A match creates an alert for review. It does not decide that a policy was broken.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field"><span>Employee</span>
+      <select name="employee_id" required>
+        <option value="">Choose</option>
+        {% for person in employees %}
+        <option value="{{ person.id }}" {% if form.employee_id|string == person.id|string %}selected{% endif %}>{{ person.full_name }} ({{ person.employee_number }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Device</span>
+      <select name="device_id" required>
+        <option value="">Choose</option>
+        {% for device in devices %}
+        <option value="{{ device.id }}" {% if form.device_id|string == device.id|string %}selected{% endif %}>{{ device.hostname }}{% if device.full_name %} — {{ device.full_name }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Activity type</span>
+      <select name="activity_type" required>
+        {% for kind in activity_types %}
+        <option value="{{ kind }}" {% if form.activity_type == kind %}selected{% endif %}>{{ kind|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>When</span><input type="datetime-local" name="occurred_at" required value="{{ form.occurred_at }}"></label>
+    <label class="field"><span>Application</span><input name="application" value="{{ form.application }}" maxlength="120"></label>
+    <label class="field"><span>Resource</span><input name="resource" value="{{ form.resource }}" maxlength="200"></label>
+    <label class="field"><span>Duration in minutes</span><input name="duration_minutes" inputmode="numeric" value="{{ form.duration_minutes }}"></label>
+    <label class="field wide"><span>Details</span><textarea name="details" maxlength="2000">{{ form.details }}</textarea></label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save activity</button>
+      <a class="btn ghost" href="{{ url_for('activities.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}Alerts · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Alerts</h1>
+    <p class="lede">These events matched a policy rule. Review the circumstances before treating one as a compliance issue.</p>
+  </div>
+</div>
+<form class="filters" method="get">
+  <label class="field"><span>Search</span><input type="search" name="q" value="{{ filters.q }}" placeholder="Employee, rule, or note"></label>
+  <label class="field"><span>Status</span>
+    <select name="status">
+      <option value="">All statuses</option>
+      {% for item in statuses %}
+      <option value="{{ item }}" {% if filters.status == item %}selected{% endif %}>{{ item|nice }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field"><span>Severity</span>
+    <select name="severity">
+      <option value="">All severities</option>
+      {% for item in severities %}
+      <option value="{{ item }}" {% if filters.severity == item %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn primary" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('alerts.index') }}">Clear</a>
+</form>
+<p class="muted">{{ pager.total }} alerts</p>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">Raised</th><th scope="col">Employee</th><th scope="col">Department</th><th scope="col">Rule</th><th scope="col">Severity</th><th scope="col">Status</th></tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><a href="{{ url_for('alerts.detail', alert_id=row.id) }}">{{ row.created_at|when }}</a></td>
+        <td>{{ row.full_name }}</td>
+        <td>{{ row.department }}</td>
+        <td>{{ row.rule_name }}</td>
+        <td><span class="pill {{ row.severity|lower }}">{{ row.severity }}</span></td>
+        <td><span class="pill {{ row.status|lower }}">{{ row.status|nice }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pager.html" %}
+{% else %}
+<p class="empty">No alerts match these filters.</p>
+{% endif %}
+{% endblock %}

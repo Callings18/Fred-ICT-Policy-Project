@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · ICT Policy Monitoring{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block content %}
+<main class="public-error" id="content">
+  <p class="eyebrow">Error {{ code }}</p>
+  <h1>Page unavailable</h1>
+  <p>{{ message }}</p>
+  <a class="btn primary" href="{{ url_for('auth.login') }}">Go to sign in</a>
+</main>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block title %}Access reviews · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Access reviews</h1>
+    <p class="lede">Opened when employment status changes to left or transferred. ICT records the decision. This screen does not change the identity provider by itself.</p>
+  </div>
+</div>
+<form class="filters" method="get">
+  <label class="field"><span>Status</span>
+    <select name="status">
+      <option value="">All</option>
+      <option value="PENDING" {% if status == 'PENDING' %}selected{% endif %}>Pending</option>
+      <option value="COMPLETED" {% if status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+    </select>
+  </label>
+  <button class="btn primary" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('reviews.index') }}">Clear</a>
+</form>
+<p class="muted">{{ pager.total }} reviews</p>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th scope="col">Opened</th><th scope="col">Employee</th><th scope="col">Department</th><th scope="col">Employment</th><th scope="col">ICT access</th><th scope="col">Review</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><a href="{{ url_for('reviews.detail', review_id=row.id) }}">{{ row.created_at|when }}</a></td>
+        <td>{{ row.full_name }}</td>
+        <td>{{ row.department }}</td>
+        <td><span class="pill {{ row.employment_status|lower }}">{{ row.employment_status|nice }}</span></td>
+        <td><span class="pill {{ row.ict_access_status|lower }}">{{ row.ict_access_status|nice }}</span></td>
+        <td><span class="pill {{ row.status|lower }}">{{ row.status|nice }}</span>{% if row.action %} · {{ row.action|nice }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pager.html" %}
+{% else %}
+<p class="empty">No access reviews match this filter.</p>
+{% endif %}
+{% endblock %}

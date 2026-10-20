@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Policy rules · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Policy rules</h1>
+    <p class="lede">Rules describe which events should be queued for review. Changing a rule does not rewrite alerts already raised.</p>
+  </div>
+  {% if can('manage_policies') %}
+  <div class="page-actions"><a class="btn primary" href="{{ url_for('policies.new') }}">New rule</a></div>
+  {% endif %}
+</div>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">Rule</th><th scope="col">Applies to</th><th scope="col">Condition</th><th scope="col">Severity</th><th scope="col">Status</th>{% if can('manage_policies') %}<th scope="col">Actions</th>{% endif %}</tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>
+          {% if can('manage_policies') %}<a href="{{ url_for('policies.edit', rule_id=row.id) }}">{{ row.name }}</a>{% else %}{{ row.name }}{% endif %}
+          {% if row.description %}<div class="muted">{{ row.description }}</div>{% endif %}
+        </td>
+        <td>{{ row.activity_type|nice }}</td>
+        <td>{{ row.condition_type|nice }}<div class="muted">{{ row.condition_value }}</div></td>
+        <td><span class="pill {{ row.severity|lower }}">{{ row.severity }}</span></td>
+        <td><span class="pill {{ row.status|lower }}">{{ row.status|nice }}</span></td>
+        {% if can('manage_policies') %}
+        <td>
+          <form method="post" action="{{ url_for('policies.toggle', rule_id=row.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+            <button class="btn ghost" type="submit">{% if row.status == 'ACTIVE' %}Deactivate{% else %}Activate{% endif %}</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty">No policy rules yet.</p>
+{% endif %}
+{% endblock %}

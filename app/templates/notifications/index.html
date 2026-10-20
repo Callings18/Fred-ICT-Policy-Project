@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}Notifications · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Notifications</h1>
+    <p class="lede">New alerts and access reviews for your role. Opening one marks it as read. These are prompts, not confirmed policy violations.</p>
+  </div>
+  {% if unread %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <button class="btn" type="submit">Mark all read</button>
+  </form>
+  {% endif %}
+</div>
+<section class="card">
+  {% if rows %}
+  <ul class="plain">
+    {% for item in rows %}
+    <li>
+      <a href="{{ url_for('notifications.open_item', notification_id=item.id) }}">
+        <strong>{{ item.title }}</strong>
+        {% if not item.read_at %}<span class="pill open">Unread</span>{% endif %}
+      </a>
+      <div class="muted">{{ item.body }}</div>
+      <div class="note">{{ item.created_at|when }}</div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% include "partials/pager.html" %}
+  {% else %}
+  <p class="empty">No notifications yet. You will see one when an alert or access review is opened for your role.</p>
+  {% endif %}
+</section>
+{% endblock %}

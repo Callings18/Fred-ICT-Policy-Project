@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% block title %}Alert {{ alert.id }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ alert.rule_name }}</h1>
+    <p class="lede">{{ alert.full_name }} · {{ alert.severity }} · {{ alert.status|nice }}</p>
+  </div>
+  <div class="page-actions"><a class="btn ghost" href="{{ url_for('alerts.index') }}">All alerts</a></div>
+</div>
+<p class="banner">This alert flags an activity for review. It is not a confirmed policy violation.</p>
+<div class="grid-2">
+  <section class="card">
+    <h2>What was flagged</h2>
+    <dl class="facts">
+      <div><dt>Employee</dt><dd>{{ alert.full_name }} ({{ alert.employee_number }})</dd></div>
+      <div><dt>Department</dt><dd>{{ alert.department }}</dd></div>
+      <div><dt>Employment</dt><dd>{{ alert.employment_status|nice }}</dd></div>
+      <div><dt>When</dt><dd>{{ activity.occurred_at|when }}</dd></div>
+      <div><dt>Device</dt><dd>{{ activity.hostname or "—" }}</dd></div>
+      <div><dt>Type</dt><dd>{{ activity.activity_type|nice }}</dd></div>
+      <div><dt>Application</dt><dd>{{ activity.application or "—" }}</dd></div>
+      <div><dt>Resource</dt><dd>{{ activity.resource or "—" }}</dd></div>
+      <div><dt>Duration</dt><dd>{% if activity.duration_minutes is not none %}{{ activity.duration_minutes }} min{% else %}—{% endif %}</dd></div>
+      <div><dt>Raised</dt><dd>{{ alert.created_at|when }}</dd></div>
+    </dl>
+    {% if activity.details %}<p class="note">{{ activity.details }}</p>{% endif %}
+    {% if finding and can('view_findings') %}
+    <p><a href="{{ url_for('findings.detail', finding_id=finding.id) }}">Open the compliance finding ({{ finding.status|nice }})</a></p>
+    {% endif %}
+    {% if can('view_activities') %}
+    <p><a href="{{ url_for('activities.detail', activity_id=activity.id) }}">Open the activity record</a></p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Review</h2>
+    {% if alert.reviewer_name %}
+    <p class="muted">Last reviewed by {{ alert.reviewer_name }} on {{ alert.reviewed_at|when }}.</p>
+    {% endif %}
+    {% if can('review_alerts') %}
+    {% include "partials/errors.html" %}
+    <form method="post" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+      <label class="field wide"><span>Outcome</span>
+        <select name="status" required>
+          {% for outcome in outcomes %}
+          <option value="{{ outcome }}" {% if form_status == outcome %}selected{% endif %}>{{ outcome|nice }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field wide"><span>Review note</span><textarea name="review_notes" required maxlength="2000">{{ form_notes }}</textarea></label>
+      <div class="form-actions"><button class="btn primary" type="submit">Save review</button></div>
+    </form>
+    {% elif alert.review_notes %}
+    <p class="note">{{ alert.review_notes }}</p>
+    {% else %}
+    <p class="empty">No review note yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

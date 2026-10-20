@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="lede">{{ current_user.role_description }} Flagged events stay in a review queue until an authorised person looks at them.</p>
+  </div>
+</div>
+<section class="metrics">
+  {% if show_activity_total %}
+  <article class="metric">
+    <p class="metric-label">Activities recorded</p>
+    <p class="metric-value">{{ metrics.activities }}</p>
+    <p class="metric-hint">Selected events from authorised devices</p>
+  </article>
+  {% endif %}
+  {% if show_alerts %}
+  <article class="metric{% if metrics.serious_alerts %} attention{% endif %}">
+    <p class="metric-label">Open alerts</p>
+    <p class="metric-value">{{ metrics.open_alerts }}</p>
+    <p class="metric-hint"><a href="{{ url_for('alerts.index', status='OPEN') }}">{{ metrics.serious_alerts }} high or critical</a></p>
+  </article>
+  <article class="metric">
+    <p class="metric-label">Reviewed alerts</p>
+    <p class="metric-value">{{ metrics.reviewed_alerts }}</p>
+    <p class="metric-hint"><a href="{{ url_for('alerts.index', status='REVIEWED') }}">A person has recorded an outcome</a></p>
+  </article>
+  <article class="metric{% if metrics.unresolved_alerts %} attention{% endif %}">
+    <p class="metric-label">Unresolved alerts</p>
+    <p class="metric-value">{{ metrics.unresolved_alerts }}</p>
+    <p class="metric-hint">Open or escalated, still waiting</p>
+  </article>
+  {% endif %}
+  {% if show_findings %}
+  <article class="metric{% if metrics.open_findings %} attention{% endif %}">
+    <p class="metric-label">Open findings</p>
+    <p class="metric-value">{{ metrics.open_findings }}</p>
+    <p class="metric-hint"><a href="{{ url_for('findings.index', status='OPEN') }}">Escalated cases under investigation</a></p>
+  </article>
+  {% endif %}
+  <article class="metric">
+    <p class="metric-label">Active employees</p>
+    <p class="metric-value">{{ metrics.active_employees }}</p>
+    <p class="metric-hint">People still in post</p>
+  </article>
+  <article class="metric{% if metrics.pending_reviews %} attention{% endif %}">
+    <p class="metric-label">Pending access reviews</p>
+    <p class="metric-value">{{ metrics.pending_reviews }}</p>
+    <p class="metric-hint">
+      {% if can('view_reviews') %}<a href="{{ url_for('reviews.index', status='PENDING') }}">Waiting for a decision</a>{% else %}Waiting for a decision{% endif %}
+    </p>
+  </article>
+  <article class="metric{% if metrics.leavers %} attention{% endif %}">
+    <p class="metric-label">Leavers with access</p>
+    <p class="metric-value">{{ metrics.leavers }}</p>
+    <p class="metric-hint">Left, but ICT access is still active</p>
+  </article>
+</section>
+
+<div class="grid-2">
+  {% if show_alerts %}
+  <section class="card">
+    <h2>Open alerts by severity</h2>
+    <div class="bars">
+      {% for bar in severity_bars %}
+      <div class="bar-row">
+        <span>{{ bar.severity }}</span>
+        <div class="bar-track"><div class="bar-fill sev-{{ bar.severity|lower }}" style="width: {{ bar.pct }}%"></div></div>
+        <strong>{{ bar.count }}</strong>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+  <section class="card">
+    <h2>Access still open after leaving</h2>
+    {% if leavers %}
+    <ul class="plain">
+      {% for person in leavers %}
+      <li>
+        {% if can('view_employees') %}<a href="{{ url_for('employees.detail', employee_id=person.id) }}">{{ person.full_name }}</a>{% else %}{{ person.full_name }}{% endif %}
+        <span class="muted">{{ person.department }} · left {{ person.left_date|day }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">No leaver currently has active ICT access.</p>
+    {% endif %}
+    {% if pending and can('view_reviews') %}
+    <h3>Pending reviews</h3>
+    <ul class="plain">
+      {% for review in pending %}
+      <li><a href="{{ url_for('reviews.detail', review_id=review.id) }}">{{ review.full_name }}</a> <span class="muted">{{ review.department }}</span></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>
+
+{% if show_alerts %}
+<section class="card">
+  <div class="card-head">
+    <h2>Recent alerts</h2>
+    <a href="{{ url_for('alerts.index') }}">View all</a>
+  </div>
+  {% if recent_alerts %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th scope="col">Raised</th><th scope="col">Employee</th><th scope="col">Rule</th><th scope="col">Severity</th><th scope="col">Status</th></tr>
+      </thead>
+      <tbody>
+        {% for alert in recent_alerts %}
+        <tr>
+          <td><a href="{{ url_for('alerts.detail', alert_id=alert.id) }}">{{ alert.created_at|when }}</a></td>
+          <td>{{ alert.full_name }}</td>
+          <td>{{ alert.rule_name }}</td>
+          <td><span class="pill {{ alert.severity|lower }}">{{ alert.severity }}</span></td>
+          <td><span class="pill {{ alert.status|lower }}">{{ alert.status|nice }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No alerts yet.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if show_activity_list %}
+<section class="card">
+  <div class="card-head">
+    <h2>Recent activity</h2>
+    <a href="{{ url_for('activities.index') }}">View all</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th scope="col">When</th><th scope="col">Employee</th><th scope="col">Device</th><th scope="col">Type</th><th scope="col">Application</th></tr>
+      </thead>
+      <tbody>
+        {% for row in recent_activities %}
+        <tr>
+          <td><a href="{{ url_for('activities.detail', activity_id=row.id) }}">{{ row.occurred_at|when }}</a></td>
+          <td>{{ row.full_name }}</td>
+          <td>{{ row.hostname or "—" }}</td>
+          <td>{{ row.activity_type|nice }}</td>
+          <td>{{ row.application or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+{% if recent_reports %}
+<section class="card">
+  <div class="card-head">
+    <h2>Recent reports</h2>
+    <a href="{{ url_for('reports.index') }}">View all</a>
+  </div>
+  <ul class="plain">
+    {% for report in recent_reports %}
+    <li><a href="{{ url_for('reports.detail', report_id=report.id) }}">{{ report.title }}</a> <span class="muted">{{ report.created_at|when }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

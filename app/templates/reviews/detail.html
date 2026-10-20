@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block title %}Access review {{ review.id }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ review.full_name }}</h1>
+    <p class="lede">{{ review.employee_number }} · {{ review.position }}, {{ review.department }}</p>
+  </div>
+  <div class="page-actions"><a class="btn ghost" href="{{ url_for('reviews.index') }}">All reviews</a></div>
+</div>
+<p class="banner">{{ review.reason }}</p>
+<section class="card">
+  <dl class="facts">
+    <div><dt>Review status</dt><dd><span class="pill {{ review.status|lower }}">{{ review.status|nice }}</span></dd></div>
+    <div><dt>Employment</dt><dd>{{ review.employment_status|nice }}</dd></div>
+    <div><dt>ICT access</dt><dd>{{ review.ict_access_status|nice }}</dd></div>
+    <div><dt>Left</dt><dd>{{ review.left_date|day }}</dd></div>
+    <div><dt>Opened</dt><dd>{{ review.created_at|when }}</dd></div>
+    <div><dt>Events on or after leaving</dt><dd>{{ later_count }}</dd></div>
+  </dl>
+</section>
+<section class="card">
+  <h2>Assigned devices</h2>
+  {% if devices %}
+  <ul class="plain">
+    {% for device in devices %}
+    <li>{{ device.hostname }} <span class="muted">{{ device.operating_system }} · {{ device.status|nice }}{% if device.ip_address %} · {{ device.ip_address }}{% endif %}</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No device is assigned.</p>
+  {% endif %}
+</section>
+{% if show_activities %}
+<section class="card">
+  <h2>Activity on or after the leaving date</h2>
+  {% if later_activities %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">When</th><th scope="col">Device</th><th scope="col">Type</th><th scope="col">Application</th><th scope="col">Resource</th></tr></thead>
+      <tbody>
+        {% for row in later_activities %}
+        <tr>
+          <td><a href="{{ url_for('activities.detail', activity_id=row.id) }}">{{ row.occurred_at|when }}</a></td>
+          <td>{{ row.hostname or "—" }}</td>
+          <td>{{ row.activity_type|nice }}</td>
+          <td>{{ row.application or "—" }}</td>
+          <td>{{ row.resource or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No monitored event falls on or after the leaving date.</p>
+  {% endif %}
+</section>
+{% endif %}
+<section class="card narrow">
+  <h2>Decision</h2>
+  {% if review.status == 'COMPLETED' %}
+  <p><strong>{{ review.action|nice }}</strong> by {{ review.reviewer_name or "an authorised reviewer" }} on {{ review.completed_at|when }}.</p>
+  {% if review.notes %}<p class="note">{{ review.notes }}</p>{% endif %}
+  {% elif can('complete_reviews') %}
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid" data-confirm="Record this access decision? Revoke access updates the employee and device records here. It does not call the identity provider.">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field wide"><span>Action</span>
+      <select name="action" required>
+        <option value="">Choose</option>
+        {% for action in actions %}
+        <option value="{{ action }}" {% if form_action == action %}selected{% endif %}>{{ action|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field wide"><span>Note</span><textarea name="notes" required maxlength="2000">{{ form_notes }}</textarea></label>
+    <div class="form-actions"><button class="btn primary" type="submit">Complete review</button></div>
+  </form>
+  {% else %}
+  <p class="empty">An ICT/Security Officer completes this review. HR can see the status and support the employee record.</p>
+  {% endif %}
+</section>
+{% endblock %}

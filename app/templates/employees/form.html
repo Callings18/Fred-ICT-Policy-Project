@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block title %}{% if editing %}Edit employee{% else %}Add employee{% endif %} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{% if editing %}Edit employee{% else %}Add employee{% endif %}</h1>
+    <p class="lede">Setting the status to left or transferred opens an access review when one is not already pending.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid" data-original-status="{{ form.employment_status }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field"><span>Employee number</span><input name="employee_number" required maxlength="20" value="{{ form.employee_number }}"></label>
+    <label class="field"><span>Full name</span><input name="full_name" required maxlength="120" value="{{ form.full_name }}"></label>
+    <label class="field"><span>Department</span><input name="department" required maxlength="80" value="{{ form.department }}"></label>
+    <label class="field"><span>Position</span><input name="position" required maxlength="80" value="{{ form.position }}"></label>
+    <label class="field wide"><span>Email</span><input name="email" type="email" maxlength="120" value="{{ form.email or '' }}"></label>
+    <label class="field"><span>Employment status</span>
+      <select name="employment_status" data-employment-status>
+        {% for item in ['ACTIVE', 'LEFT', 'TRANSFERRED'] %}
+        <option value="{{ item }}" {% if form.employment_status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>ICT access</span>
+      <select name="ict_access_status">
+        {% for item in ['ACTIVE', 'REVOKED'] %}
+        <option value="{{ item }}" {% if form.ict_access_status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Hire date</span><input type="date" name="hire_date" value="{{ form.hire_date or '' }}"></label>
+    <label class="field"><span>Leaving date</span><input type="date" name="left_date" value="{{ form.left_date or '' }}"></label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save employee</button>
+      <a class="btn ghost" href="{{ url_for('employees.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

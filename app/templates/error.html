@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block title %}{{ code }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<section class="card narrow">
+  <p class="eyebrow">Error {{ code }}</p>
+  <h1>Page unavailable</h1>
+  <p>{{ message }}</p>
+  <a class="btn primary" href="{{ url_for('dashboard.index') }}">Back to the dashboard</a>
+</section>
+{% endblock %}

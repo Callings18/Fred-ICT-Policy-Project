@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}My account · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>My account</h1>
+    <p class="lede">{{ current_user.username }} · {{ current_user.role_name }}. Your role is assigned by a system administrator.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field wide"><span>Full name</span>
+      <input name="full_name" required maxlength="120" value="{{ form.full_name }}">
+    </label>
+    {% if current_user.email %}
+    <label class="field wide"><span>Email</span>
+      <input value="{{ current_user.email }}" readonly>
+    </label>
+    {% endif %}
+    <label class="field"><span>Current password</span>
+      <input name="current_password" type="password" autocomplete="current-password">
+    </label>
+    <label class="field"><span>New password</span>
+      <input name="new_password" type="password" autocomplete="new-password">
+    </label>
+    <label class="field wide"><span>Confirm new password</span>
+      <input name="confirm_password" type="password" autocomplete="new-password">
+    </label>
+    <p class="note">Leave the password fields blank to keep the current password. A new password needs at least 8 characters, including a letter and a number.</p>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save profile</button>
+    </div>
+  </form>
+</section>
+<section class="card">
+  <h2>Your recent actions</h2>
+  {% if recent %}
+  <ul class="plain">
+    {% for item in recent %}
+    <li>{{ item.created_at|when }} — {{ item.action }}{% if item.entity %} ({{ item.entity|nice }}){% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No actions recorded for this account yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

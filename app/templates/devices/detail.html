@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block title %}{{ device.hostname }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ device.hostname }}</h1>
+    <p class="lede">{{ device.operating_system }}{% if device.ip_address %} · {{ device.ip_address }}{% endif %}</p>
+  </div>
+  {% if can('manage_devices') %}
+  <div class="page-actions"><a class="btn primary" href="{{ url_for('devices.edit', device_id=device.id) }}">Edit</a></div>
+  {% endif %}
+</div>
+<section class="card">
+  <dl class="facts">
+    <div><dt>Status</dt><dd><span class="pill {{ device.status|lower }}">{{ device.status|nice }}</span></dd></div>
+    <div><dt>Assigned to</dt><dd>{% if device.full_name %}{{ device.full_name }} ({{ device.employee_number }}){% else %}Unassigned{% endif %}</dd></div>
+    <div><dt>Registered</dt><dd>{{ device.registered_at|when }}</dd></div>
+  </dl>
+</section>
+{% if can('view_activities') %}
+<section class="card">
+  <h2>Recent activity from this device</h2>
+  {% if activities %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">When</th><th scope="col">Employee</th><th scope="col">Type</th><th scope="col">Application</th></tr></thead>
+      <tbody>
+        {% for row in activities %}
+        <tr>
+          <td><a href="{{ url_for('activities.detail', activity_id=row.id) }}">{{ row.occurred_at|when }}</a></td>
+          <td>{{ row.full_name }}</td>
+          <td>{{ row.activity_type|nice }}</td>
+          <td>{{ row.application or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No activity recorded on this device.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

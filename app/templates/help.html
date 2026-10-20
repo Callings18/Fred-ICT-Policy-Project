@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}How to use · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>How to use</h1>
+    <p class="lede">A short operating guide for the ICT Policy Monitoring and Compliance Management System.</p>
+  </div>
+</div>
+<section class="card prose">
+  <h2>What this system does</h2>
+  <p>It collects selected ICT events, compares them with policy rules, and shows the matches to authorised staff. A match is an alert for review. It is not a finding that someone broke a policy, and it is not a disciplinary decision.</p>
+  <p>When HR records that someone has left or transferred, the system opens an access review. An ICT/Security Officer then records either “review only” or “revoke access”. Revoke access updates the employee and device records in this system. The organisation’s identity provider still has to be updated separately.</p>
+  <h2>Roles</h2>
+  <ul>
+    <li><strong>System Administrator</strong> manages users, roles, policy rules, system settings, database backups, and the full set of screens.</li>
+    <li><strong>ICT/Security Officer</strong> works the activity and alert queues, records findings, devices, reports, the audit log, and access reviews.</li>
+    <li><strong>Management</strong> sees the dashboard, alerts, findings, and reports for oversight, without the activity browser or user administration.</li>
+    <li><strong>HR Officer</strong> maintains employee status and submits leavers. HR does not browse activity content.</li>
+  </ul>
+  <h2>Sign in</h2>
+  <p>Open the sign-in page and use the username and password issued to you. After a successful sign-in you land on the dashboard for your role. Use Sign out when you finish. Demonstration accounts are listed on the sign-in page.</p>
+  <h2>Dashboard</h2>
+  <p>The figures at the top are the queue: open alerts, alerts a person has already reviewed, unresolved alerts that are still open or escalated, people still in post, pending access reviews, and leavers whose ICT access is still active. Open a name or an alert to see the underlying record, if your role allows it.</p>
+  <h2>Notifications and your account</h2>
+  <p>Notifications lists new alerts for ICT reviewers and new access reviews for the officers who complete them. Open an item to go to the record. Your name in the header opens My account, where you can correct your name or change your password. A system administrator assigns your role.</p>
+  <h2>System settings</h2>
+  <p>A system administrator can set the organisation name shown in the navigation and download a MySQL backup. Recovery means stopping the application and importing that SQL file into the <code>ipmcs</code> database.</p>
+  <h2>Activities</h2>
+  <p>The activity list is the monitoring record: sign-in, sign-out, application use, resource access, and network events. Filter by person, type, or date. Use Record activity when you are demonstrating the collector, or when an event is being entered by hand. Endpoint agents can post the same fields to <code>/api/v1/activities</code> with the header <code>X-API-Key</code>.</p>
+  <h2>Policy rules</h2>
+  <p>Administrators create rules such as sign-in outside 08:00–17:00, weekend use, an unapproved application, a sensitive resource name, a very long session, or any event on or after a leaving date. Deactivate a rule that is producing noise. New events are checked against active rules only. Alerts already raised keep their original severity.</p>
+  <h2>Alerts and findings</h2>
+  <p>Open an alert, read the event, and choose Reviewed, Dismissed, or Escalated. Write a note that says why. Escalated opens a compliance finding so the investigation has its own record. Close that finding with a conclusion when the check is finished. Dismissed, reviewed, and closed are all human decisions. None of them confirms a policy breach by itself.</p>
+  <h2>Employees, devices, and HR intake</h2>
+  <p>Register the computers that are in scope, and keep each one linked to the person who uses it. HR updates employment status from HR intake or the employee form. Choosing Left or Transferred opens one pending access review if there is not one already.</p>
+  <h2>Access reviews</h2>
+  <p>The ICT/Security Officer opens the pending review, checks devices and any events after the leaving date, and records the decision. Review only leaves access unchanged and documents that a person looked. Revoke access marks ICT access as revoked and sets that person’s devices to inactive in this system.</p>
+  <h2>Reports and the audit log</h2>
+  <p>Generate a snapshot for activities, alerts, access reviews, the audit log, or a compliance summary. You only see report types your role is allowed to read. Export a CSV or print the page. The audit log answers who performed an action, what they did, and when.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Finding {{ finding.id }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ finding.title }}</h1>
+    <p class="lede">{{ finding.full_name }} · {{ finding.severity }} · {{ finding.status|nice }}</p>
+  </div>
+  <div class="page-actions"><a class="btn ghost" href="{{ url_for('findings.index') }}">All findings</a></div>
+</div>
+<p class="banner">This record follows an escalated alert. Closing it documents a person’s conclusion. It does not declare that a policy was broken.</p>
+<div class="grid-2">
+  <section class="card">
+    <h2>Case</h2>
+    <dl class="facts">
+      <div><dt>Employee</dt><dd>{{ finding.full_name }} ({{ finding.employee_number }})</dd></div>
+      <div><dt>Department</dt><dd>{{ finding.department }}</dd></div>
+      <div><dt>Alert</dt><dd><a href="{{ url_for('alerts.detail', alert_id=finding.alert_id) }}">{{ finding.rule_name }}</a></dd></div>
+      <div><dt>Alert status</dt><dd>{{ finding.alert_status|nice }}</dd></div>
+      <div><dt>Opened</dt><dd>{{ finding.created_at|when }}{% if finding.opener_name %} by {{ finding.opener_name }}{% endif %}</dd></div>
+      {% if finding.closed_at %}
+      <div><dt>Closed</dt><dd>{{ finding.closed_at|when }}{% if finding.closer_name %} by {{ finding.closer_name }}{% endif %}</dd></div>
+      {% endif %}
+    </dl>
+    <h3>Why it was escalated</h3>
+    <p>{{ finding.summary }}</p>
+    {% if finding.conclusion %}
+    <h3>Conclusion</h3>
+    <p>{{ finding.conclusion }}</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Close the finding</h2>
+    {% if finding.status == 'OPEN' and can('manage_findings') %}
+    {% include "partials/errors.html" %}
+    <form method="post" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+      <label class="field wide"><span>Conclusion</span><textarea name="conclusion" required maxlength="2000"></textarea></label>
+      <p class="note">State what was checked and what should happen next. This does not revoke access or discipline anyone.</p>
+      <div class="form-actions"><button class="btn primary" type="submit">Close finding</button></div>
+    </form>
+    {% elif finding.status == 'OPEN' %}
+    <p class="empty">An ICT/Security Officer records the conclusion.</p>
+    {% else %}
+    <p class="muted">This finding is closed.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

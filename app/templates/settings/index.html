@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}System settings · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>System settings</h1>
+    <p class="lede">The name shown in the navigation, and a copy of the database for safekeeping.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field wide"><span>Organisation name</span>
+      <input name="organisation_name" required maxlength="80" value="{{ form.organisation_name }}">
+    </label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save settings</button>
+    </div>
+  </form>
+</section>
+<section class="card narrow">
+  <h2>Database backup</h2>
+  <p>The store currently holds {{ counts.users }} user accounts, {{ counts.activities }} activities, {{ counts.alerts }} alerts, and {{ counts.audit }} audit records.</p>
+  <p class="note">Download a SQL copy of the MySQL database. To recover, import that file into the <code>ipmcs</code> database while the application is stopped.</p>
+  <form method="post" action="{{ url_for('settings.backup') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <button class="btn primary" type="submit">Download backup</button>
+  </form>
+</section>
+{% endblock %}

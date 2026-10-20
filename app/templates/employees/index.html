@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}Employees · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Employees</h1>
+    <p class="lede">People whose ICT activity may be monitored, and whose access should be reviewed when they leave.</p>
+  </div>
+  {% if can('manage_employees') %}
+  <div class="page-actions"><a class="btn primary" href="{{ url_for('employees.new') }}">Add employee</a></div>
+  {% endif %}
+</div>
+<form class="filters" method="get">
+  <label class="field"><span>Search</span><input type="search" name="q" value="{{ filters.q }}" placeholder="Name, number, or department"></label>
+  <label class="field"><span>Employment</span>
+    <select name="status">
+      <option value="">All</option>
+      {% for item in statuses %}
+      <option value="{{ item }}" {% if filters.status == item %}selected{% endif %}>{{ item|nice }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn primary" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('employees.index') }}">Clear</a>
+</form>
+<p class="muted">{{ pager.total }} employees</p>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">Number</th><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Position</th><th scope="col">Employment</th><th scope="col">ICT access</th></tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.employee_number }}</td>
+        <td><a href="{{ url_for('employees.detail', employee_id=row.id) }}">{{ row.full_name }}</a></td>
+        <td>{{ row.department }}</td>
+        <td>{{ row.position }}</td>
+        <td><span class="pill {{ row.employment_status|lower }}">{{ row.employment_status|nice }}</span></td>
+        <td>
+          <span class="pill {{ row.ict_access_status|lower }}">{{ row.ict_access_status|nice }}</span>
+          {% if row.employment_status == 'LEFT' and row.ict_access_status == 'ACTIVE' %}
+          <span class="pill critical">Access still active</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pager.html" %}
+{% else %}
+<p class="empty">No employees match these filters.</p>
+{% endif %}
+{% endblock %}

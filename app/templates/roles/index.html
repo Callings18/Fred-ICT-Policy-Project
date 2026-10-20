@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}Roles and permissions · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Roles and permissions</h1>
+    <p class="lede">Each account has one role. The role decides which screens that person can open. Assign the role from Users.</p>
+  </div>
+</div>
+<section class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Permission</th>
+          {% for role in roles %}
+          <th scope="col">{{ role.name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for permission in permissions %}
+        <tr>
+          <th scope="row">{{ permission.name }}</th>
+          {% for role in roles %}
+          <td>{% if (role.id, permission.id) in granted %}Yes{% else %}—{% endif %}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

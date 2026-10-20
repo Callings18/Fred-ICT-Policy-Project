@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <strong>{{ organisation_name }}</strong>
+      <em>Compliance management</em>
+    </div>
+    <nav aria-label="Main">
+      {% for section in nav_sections %}
+      <section class="nav-section">
+        <h2>{{ section.title }}</h2>
+        {% for item in section.links %}
+        <a class="nav-link{% if item.active %} active{% endif %}" href="{{ url_for(item.endpoint) }}" {% if item.active %}aria-current="page"{% endif %}>
+          <span>{{ item.label }}</span>
+          {% if item.badge == 'alerts' and open_alerts %}<span class="count">{{ open_alerts }}</span>{% endif %}
+          {% if item.badge == 'findings' and open_findings %}<span class="count">{{ open_findings }}</span>{% endif %}
+          {% if item.badge == 'reviews' and pending_reviews %}<span class="count">{{ pending_reviews }}</span>{% endif %}
+          {% if item.badge == 'notifications' and unread_notifications %}<span class="count">{{ unread_notifications }}</span>{% endif %}
+        </a>
+        {% endfor %}
+      </section>
+      {% endfor %}
+    </nav>
+    <p class="side-foot">Alerts are leads for review. They are not confirmed policy violations.</p>
+  </aside>
+  <div class="main-col">
+    <header class="topbar">
+      <button class="nav-toggle" type="button" data-nav-toggle aria-controls="sidebar" aria-expanded="false">Menu</button>
+      <div class="who">
+        <strong><a href="{{ url_for('account.index') }}">{{ current_user.full_name }}</a></strong>
+        <span>{{ current_user.role_name }}</span>
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+        <button class="btn ghost" type="submit">Sign out</button>
+      </form>
+    </header>
+    <main id="content" class="content">
+      {% include "partials/flashes.html" %}
+      {% block page %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

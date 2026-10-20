@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %}{% if editing %}Edit device{% else %}Register device{% endif %} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{% if editing %}Edit device{% else %}Register device{% endif %}</h1>
+    <p class="lede">Only registered devices should appear in monitoring records.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field"><span>Hostname</span><input name="hostname" required maxlength="63" value="{{ form.hostname }}"></label>
+    <label class="field"><span>IP address</span><input name="ip_address" value="{{ form.ip_address or '' }}" placeholder="10.10.1.20"></label>
+    <label class="field"><span>Operating system</span><input name="operating_system" required maxlength="80" value="{{ form.operating_system }}"></label>
+    <label class="field"><span>Status</span>
+      <select name="status">
+        {% for item in ['ACTIVE', 'INACTIVE'] %}
+        <option value="{{ item }}" {% if form.status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field wide"><span>Assigned employee</span>
+      <select name="employee_id">
+        <option value="">Unassigned</option>
+        {% for person in employees %}
+        <option value="{{ person.id }}" {% if form.employee_id|string == person.id|string %}selected{% endif %}>{{ person.full_name }} ({{ person.employee_number }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save device</button>
+      <a class="btn ghost" href="{{ url_for('devices.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block title %}{% if editing %}Edit user{% else %}New user{% endif %} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{% if editing %}Edit user{% else %}New user{% endif %}</h1>
+    <p class="lede">The role decides which screens and actions are available.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field"><span>Username</span>
+      <input name="username" {% if editing %}readonly{% endif %} required maxlength="32" value="{{ form.username }}" autocomplete="off">
+    </label>
+    <label class="field"><span>Full name</span><input name="full_name" required maxlength="120" value="{{ form.full_name }}"></label>
+    <label class="field wide"><span>Password</span>
+      <input name="password" type="password" autocomplete="new-password" {% if not editing %}required{% endif %} placeholder="{% if editing %}Leave blank to keep the current password{% endif %}">
+    </label>
+    <label class="field"><span>Role</span>
+      <select name="role_id" required>
+        <option value="">Choose</option>
+        {% for role in roles %}
+        <option value="{{ role.id }}" {% if form.role_id|string == role.id|string %}selected{% endif %}>{{ role.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Account status</span>
+      <select name="status">
+        {% for item in ['ACTIVE', 'INACTIVE'] %}
+        <option value="{{ item }}" {% if form.status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field wide"><span>Linked employee</span>
+      <select name="employee_id">
+        <option value="">None</option>
+        {% for person in employees %}
+        <option value="{{ person.id }}" {% if form.employee_id|string == person.id|string %}selected{% endif %}>{{ person.full_name }} ({{ person.employee_number }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save user</button>
+      <a class="btn ghost" href="{{ url_for('users.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

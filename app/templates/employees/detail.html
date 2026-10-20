@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block title %}{{ employee.full_name }} · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>{{ employee.full_name }}</h1>
+    <p class="lede">{{ employee.employee_number }} · {{ employee.position }}, {{ employee.department }}</p>
+  </div>
+  {% if can('manage_employees') %}
+  <div class="page-actions"><a class="btn primary" href="{{ url_for('employees.edit', employee_id=employee.id) }}">Edit</a></div>
+  {% endif %}
+</div>
+{% if employee.employment_status == 'LEFT' and employee.ict_access_status == 'ACTIVE' %}
+<p class="banner">This person has left, and ICT access is still marked active.</p>
+{% endif %}
+<section class="card">
+  <dl class="facts">
+    <div><dt>Employment</dt><dd><span class="pill {{ employee.employment_status|lower }}">{{ employee.employment_status|nice }}</span></dd></div>
+    <div><dt>ICT access</dt><dd><span class="pill {{ employee.ict_access_status|lower }}">{{ employee.ict_access_status|nice }}</span></dd></div>
+    <div><dt>Email</dt><dd>{{ employee.email or "—" }}</dd></div>
+    <div><dt>Hired</dt><dd>{{ employee.hire_date|day }}</dd></div>
+    <div><dt>Left</dt><dd>{{ employee.left_date|day }}</dd></div>
+    <div><dt>Monitored events</dt><dd>{{ activity_count }}</dd></div>
+  </dl>
+</section>
+<section class="card">
+  <h2>Devices</h2>
+  {% if devices %}
+  <ul class="plain">
+    {% for device in devices %}
+    <li>
+      {% if can('view_devices') %}<a href="{{ url_for('devices.detail', device_id=device.id) }}">{{ device.hostname }}</a>{% else %}{{ device.hostname }}{% endif %}
+      <span class="muted">{{ device.operating_system }} · {{ device.status|nice }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No device is assigned.</p>
+  {% endif %}
+</section>
+<section class="card">
+  <h2>Access reviews</h2>
+  {% if reviews %}
+  <ul class="plain">
+    {% for review in reviews %}
+    <li>
+      {% if can('view_reviews') %}<a href="{{ url_for('reviews.detail', review_id=review.id) }}">{{ review.status|nice }}</a>{% else %}{{ review.status|nice }}{% endif %}
+      <span class="muted">{{ review.created_at|when }}{% if review.action %} · {{ review.action|nice }}{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No access review has been opened.</p>
+  {% endif %}
+</section>
+{% if show_activities %}
+<section class="card">
+  <h2>Recent activity</h2>
+  {% if activities %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">When</th><th scope="col">Device</th><th scope="col">Type</th><th scope="col">Application</th><th scope="col">Resource</th></tr></thead>
+      <tbody>
+        {% for row in activities %}
+        <tr>
+          <td><a href="{{ url_for('activities.detail', activity_id=row.id) }}">{{ row.occurred_at|when }}</a></td>
+          <td>{{ row.hostname or "—" }}</td>
+          <td>{{ row.activity_type|nice }}</td>
+          <td>{{ row.application or "—" }}</td>
+          <td>{{ row.resource or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No activity recorded.</p>
+  {% endif %}
+</section>
+{% else %}
+<p class="muted">Activity detail is limited to ICT monitoring roles. This record shows the count only.</p>
+{% endif %}
+{% endblock %}

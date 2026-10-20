@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}Activities · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Activities</h1>
+    <p class="lede">Selected events from authorised computers. Recording an event here stands in for a monitoring agent.</p>
+  </div>
+  {% if can('record_activities') %}
+  <div class="page-actions"><a class="btn primary" href="{{ url_for('activities.new') }}">Record activity</a></div>
+  {% endif %}
+</div>
+<form class="filters" method="get">
+  <label class="field"><span>Search</span><input type="search" name="q" value="{{ filters.q }}" placeholder="Name, device, application"></label>
+  <label class="field"><span>Type</span>
+    <select name="type">
+      <option value="">All types</option>
+      {% for kind in activity_types %}
+      <option value="{{ kind }}" {% if filters.type == kind %}selected{% endif %}>{{ kind|nice }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field"><span>Employee</span>
+    <select name="employee">
+      <option value="">All employees</option>
+      {% for person in employees %}
+      <option value="{{ person.id }}" {% if filters.employee == person.id|string %}selected{% endif %}>{{ person.full_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field"><span>From</span><input type="date" name="date_from" value="{{ filters.date_from }}"></label>
+  <label class="field"><span>To</span><input type="date" name="date_to" value="{{ filters.date_to }}"></label>
+  <button class="btn primary" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('activities.index') }}">Clear</a>
+</form>
+<p class="muted">{{ pager.total }} records</p>
+{% if rows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">When</th><th scope="col">Employee</th><th scope="col">Device</th><th scope="col">Type</th>
+        <th scope="col">Application</th><th scope="col">Resource</th><th scope="col">Minutes</th><th scope="col">Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><a href="{{ url_for('activities.detail', activity_id=row.id) }}">{{ row.occurred_at|when }}</a></td>
+        <td>{{ row.full_name }}</td>
+        <td>{{ row.hostname or "—" }}</td>
+        <td>{{ row.activity_type|nice }}</td>
+        <td>{{ row.application or "—" }}</td>
+        <td>{{ row.resource or "—" }}</td>
+        <td>{% if row.duration_minutes is not none %}{{ row.duration_minutes }}{% else %}—{% endif %}</td>
+        <td><span class="pill {{ row.source|lower }}">{{ row.source|nice }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pager.html" %}
+{% else %}
+<p class="empty">No activities match these filters.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% if pager.pages > 1 %}
+<nav class="pager" aria-label="Pagination">
+  {% if pager.page > 1 %}
+  <a class="btn ghost" href="{{ page_url(pager.page - 1) }}">Previous</a>
+  {% endif %}
+  <span>Page {{ pager.page }} of {{ pager.pages }}</span>
+  {% if pager.page < pager.pages %}
+  <a class="btn ghost" href="{{ page_url(pager.page + 1) }}">Next</a>
+  {% endif %}
+</nav>
+{% endif %}

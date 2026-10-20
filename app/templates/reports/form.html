@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Generate report · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>Generate report</h1>
+    <p class="lede">Choose a period. Leave a filter blank to include every matching record you are allowed to see.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field wide"><span>Report</span>
+      <select name="report_type" data-report-type required>
+        {% for key, label in types %}
+        <option value="{{ key }}" {% if form.report_type == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>From</span><input type="date" name="date_from" value="{{ form.date_from }}"></label>
+    <label class="field"><span>To</span><input type="date" name="date_to" value="{{ form.date_to }}"></label>
+    <label class="field wide"><span>Employee</span>
+      <select name="employee_id">
+        <option value="">All employees</option>
+        {% for person in employees %}
+        <option value="{{ person.id }}" {% if form.employee_id|string == person.id|string %}selected{% endif %}>{{ person.full_name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field" data-alert-filter><span>Alert severity</span>
+      <select name="severity">
+        <option value="">All</option>
+        {% for level in severities %}
+        <option value="{{ level }}" {% if form.severity == level %}selected{% endif %}>{{ level }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field" data-alert-filter><span>Alert status</span>
+      <select name="status">
+        <option value="">All</option>
+        {% for item in statuses %}
+        <option value="{{ item }}" {% if form.status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Generate</button>
+      <a class="btn ghost" href="{{ url_for('reports.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

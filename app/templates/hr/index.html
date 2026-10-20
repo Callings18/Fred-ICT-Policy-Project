@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}HR intake · ICT Policy Monitoring{% endblock %}
+{% block page %}
+<div class="page-head">
+  <div>
+    <h1>HR intake</h1>
+    <p class="lede">This screen stands in for the HR system. A change to left or transferred asks ICT to review access. It does not disable accounts in the identity provider.</p>
+  </div>
+</div>
+<section class="card narrow">
+  {% include "partials/errors.html" %}
+  <form method="post" class="form-grid" data-original-status="">
+    <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+    <label class="field"><span>Employee number</span><input name="employee_number" required maxlength="20" value="{{ form.employee_number }}" placeholder="EMP-1042"></label>
+    <label class="field"><span>New employment status</span>
+      <select name="employment_status" data-employment-status>
+        {% for item in statuses %}
+        <option value="{{ item }}" {% if form.employment_status == item %}selected{% endif %}>{{ item|nice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field"><span>Effective date</span><input type="date" name="left_date" value="{{ form.left_date }}"></label>
+    <div class="form-actions"><button class="btn primary" type="submit">Submit status</button></div>
+  </form>
+</section>
+<section class="card">
+  <h2>Employee numbers</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Number</th><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Employment</th><th scope="col">ICT access</th></tr></thead>
+      <tbody>
+        {% for row in recent %}
+        <tr>
+          <td>{{ row.employee_number }}</td>
+          <td>{{ row.full_name }}</td>
+          <td>{{ row.department }}</td>
+          <td><span class="pill {{ row.employment_status|lower }}">{{ row.employment_status|nice }}</span></td>
+          <td><span class="pill {{ row.ict_access_status|lower }}">{{ row.ict_access_status|nice }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
