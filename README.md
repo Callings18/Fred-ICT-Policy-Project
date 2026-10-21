@@ -7,25 +7,31 @@ The system keeps its own record of employees, devices, activity, rules, alerts, 
 ## What you need
 
 - Python 3.11 or newer
-- A MySQL-compatible database server on port 3306
+- MySQL 8, or MariaDB 10.4 or newer, listening on port 3306
+- The Python packages in `requirements.txt` (Flask and PyMySQL)
 
-On Windows, XAMPP’s MySQL service is enough. That service is MariaDB, and it speaks the MySQL protocol. MySQL 8 works as well. Do not install a second database server on the same port.
+The full install for Windows, macOS, and Linux is in [HOW_TO_RUN.md](HOW_TO_RUN.md).
 
 ## How to run it
 
-1. Start the database. In XAMPP, start MySQL from the control panel and leave it running.
-2. Open a terminal in this folder and create a Python environment:
+Start the database, then from this folder:
 
 ```text
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
+```
+
+Windows: `.venv\Scripts\activate`
+
+macOS and Linux: `source .venv/bin/activate`
+
+```text
+python -m pip install -r requirements.txt
 python run.py
 ```
 
-On macOS or Linux, activate the environment with `source .venv/bin/activate` instead of the Windows command.
+Open http://127.0.0.1:5050
 
-3. Open http://127.0.0.1:5050
+If the database user is not `root` with an empty password, set `IPMCS_DB_PASSWORD` and the other variables in [HOW_TO_RUN.md](HOW_TO_RUN.md) before `python run.py`. A `.env` file is not loaded on its own.
 
 The first launch creates a database named `ipmcs` and loads demonstration employees, devices, rules, activities, and alerts. Later launches keep the data that is already there.
 
@@ -139,10 +145,11 @@ The tests use a separate database named `ipmcs_test` and remove it when they fin
 ## Files
 
 ```text
+HOW_TO_RUN.md           Step-by-step setup for Windows, macOS, and Linux
 run.py                  Starts the application on http://127.0.0.1:5050
 requirements.txt        Python packages to install
-.env.example            Settings you can copy into the environment
-README.md               This guide
+.env.example            Names of the settings the application reads
+README.md               What the system is and how the roles work
 
 app/__init__.py         Application setup, security headers, and navigation data
 app/auth.py             Sign-in, sessions, and permission checks

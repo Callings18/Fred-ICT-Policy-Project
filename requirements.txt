@@ -1,2 +1,6 @@
+# Install with: python -m pip install -r requirements.txt
+# Requires Python 3.11 or newer, plus MySQL 8 or MariaDB 10.4 or newer.
+# Flask brings in Werkzeug, Jinja2, and its other dependencies.
+
 Flask>=3.0,<4
 PyMySQL>=1.1,<2
